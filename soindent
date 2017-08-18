@@ -1,0 +1,102 @@
+#!/usr/bin/python
+
+import argparse
+import sys
+import os
+
+def create_parser() :
+    parser = argparse.ArgumentParser(
+        prog="soindent",
+        description=(
+            "Adds 4 spaces to the input file so that Stack Overflow "
+            "(and other markdown apps) outputs a perfect code block."
+        )
+    )
+
+    parser.add_argument(
+        'filename',
+        type=str,
+        help="Filename of file containing the code snippet"
+    )
+
+    parser.add_argument(
+        '-start',
+        metavar="",
+        type=int,
+        nargs='?',
+        default=1,
+        help="Start line on which the code block starts (default 1)"
+    )
+
+    parser.add_argument(
+        '-end',
+        metavar="",
+        type=int,
+        nargs='?',
+        help="End line on which the code block ends (default EOF)"
+    )
+
+    return parser
+
+def get_lines_from_file(filename, a, b) :
+    output = None
+    with open(args.filename, "r") as f:
+
+        # Grab text line by line
+        lines = f.readlines()
+
+        # Prepend 4 spaces to each line
+        lines = ["     {}".format(line) for line in lines[a - 1: b]]
+
+    return lines
+
+
+def get_variables(args):
+    filename = args.filename
+    a = args.start
+    b = args.end
+
+    # If `Start Index` is not supplied, set to line 1
+    if not a :
+        a = 1
+
+    # If `End Index` is not supplied, set line to end of file
+    if not b :
+        with open(filename, "r") as f :
+            b = len(f.readlines())
+
+    return (filename, a, b)
+
+def stack_overflowize(lines) :
+    output = reduce(str.__add__, ["    {}".format(line) for line in lines])
+
+    if output[-1] == "\n"  :
+        output = output[:-1]
+
+    return output
+
+if __name__ == "__main__" :
+
+    lines = None
+
+    # check os for piped input
+    piped_input = not os.isatty(0)
+
+    # set `lines` depending on how the data was inputed
+    if piped_input :
+        lines = sys.stdin.readlines()
+
+    else :
+        # Parser
+        parser = create_parser()
+
+        # Pull args
+        args = parser.parse_args()
+
+        # Get the right variables
+        filename, a, b = get_variables(args)
+
+        lines = get_lines_from_file(filename, a, b)
+
+    # Process file and output
+    print(stack_overflowize(lines))
