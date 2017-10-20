@@ -16,7 +16,7 @@ def create_parser() :
     parser.add_argument(
         'filename',
         type=str,
-        help="Filename of file containing the code snippet"
+        help="Filename of file containing the code snippet."
     )
 
     parser.add_argument(
@@ -25,7 +25,7 @@ def create_parser() :
         type=int,
         nargs='?',
         default=1,
-        help="Start line on which the code block starts (default 1)"
+        help="Start line on which the code block starts (default 1)."
     )
 
     parser.add_argument(
@@ -33,20 +33,28 @@ def create_parser() :
         metavar="",
         type=int,
         nargs='?',
-        help="End line on which the code block ends (default EOF)"
+        help="End line on which the code block ends (default EOF)."
+    )
+
+    parser.add_argument(
+        '--lang',
+        metavar="",
+        type=str,
+        nargs='?',
+        help="Prepends <!-- language: lang --> tag for syntax highlighting."
     )
 
     return parser
 
 def get_lines_from_file(filename, a, b) :
-    output = None
+    lines = None
     with open(args.filename, "r") as f:
 
         # Grab text line by line
         lines = f.readlines()
 
         # Prepend 4 spaces to each line
-        lines = ["     {}".format(line) for line in lines[a - 1: b]]
+        lines = lines[a - 1: b]
 
     return lines
 
@@ -67,7 +75,10 @@ def get_variables(args):
 
     return (filename, a, b)
 
-def stack_overflowize(lines) :
+def stack_overflowize(lines, lang=None) :
+    if lang :
+        lines = ["\n<!-- language: {} -->\n\n".format(lang)] + lines
+
     output = reduce(str.__add__, ["    {}".format(line) for line in lines])
 
     if output[-1] == "\n"  :
